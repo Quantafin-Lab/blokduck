@@ -41,10 +41,16 @@ Pin a specific release instead of `latest` by using the version tag, e.g.
 Each installer provisions Docker (if missing), creates folders + `config.json`,
 pulls the image, and launches the container on port 8787.
 
-**Windows (PowerShell):**
+**Windows (Command Prompt):**
+
+```cmd
+curl -L -o install-windows.bat https://github.com/Quantafin-Lab/blokduck/releases/latest/download/install-windows.bat && install-windows.bat
+```
+
+Or in PowerShell:
 
 ```powershell
-iwr https://github.com/Quantafin-Lab/blokduck/releases/latest/download/install-windows.ps1 -OutFile install-windows.ps1; .\install-windows.ps1
+iwr https://github.com/Quantafin-Lab/blokduck/releases/latest/download/install-windows.bat -OutFile install-windows.bat; .\install-windows.bat
 ```
 
 **macOS:**
@@ -65,7 +71,7 @@ Each release ships the install scripts above plus a macOS menu-bar app:
 
 | Platform | Asset | Notes |
 | --- | --- | --- |
-| Windows | `install-windows.ps1` | PowerShell script — checks for Docker Desktop, writes `config.json`, launches the container. |
+| Windows | `install-windows.bat` | Batch script — double-click it (no PowerShell execution policy needed); checks for Docker Desktop, writes `config.json`, launches the container. |
 | macOS | `install-mac.sh` | Bash script — provisions Docker, launches the container. |
 | Linux | `install-linux.sh` | Bash script — installs Docker if missing, launches the container. |
 | macOS menu app | `BlokduckMenuApp-Mac-Arm.tar.gz` / `BlokduckMenuApp-Mac-x86.tar.gz` | Extract and drop `BlokduckMenu.app` into Applications. The menu-bar icon edits `config.json` and starts/stops the container. |

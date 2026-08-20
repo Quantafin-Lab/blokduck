@@ -36,16 +36,39 @@ makes no outbound calls.
 Pin a specific release instead of `latest` by using the version tag, e.g.
 `ghcr.io/quantafin-lab/blokduck:0.4.10`.
 
+### One-line install (Docker-first)
+
+Each installer provisions Docker (if missing), creates folders + `config.json`,
+pulls the image, and launches the container on port 8787.
+
+**Windows (PowerShell):**
+
+```powershell
+iwr https://github.com/Quantafin-Lab/blokduck/releases/latest/download/install-windows.ps1 -OutFile install-windows.ps1; .\install-windows.ps1
+```
+
+**macOS:**
+
+```bash
+curl -fsSL https://github.com/Quantafin-Lab/blokduck/releases/latest/download/install-mac.sh | bash
+```
+
+**Linux:**
+
+```bash
+curl -fsSL https://github.com/Quantafin-Lab/blokduck/releases/latest/download/install-linux.sh | bash
+```
+
 ### Platform installers
 
-Each release also ships a Docker-first installer that provisions Docker (if
-missing) and launches the container for you:
+Each release ships the install scripts above plus a macOS menu-bar app:
 
-| Platform | Artifact | Notes |
+| Platform | Asset | Notes |
 | --- | --- | --- |
-| Windows | `blokduck-docker-setup-v<version>.exe` | Inno Setup wizard — checks for Docker Desktop, writes `config.json`, creates a Desktop shortcut, launches the container on port 8787. |
-| macOS | `BlokduckMenu-app.tar.gz` | Extract and drop `BlokduckMenu.app` into Applications. The menu-bar icon edits `config.json` and starts/stops the Docker container. |
-| Linux | `blokduck-linux-x86_64.tar.gz` | Extract and run `bash install.sh`. Installs Docker if missing, creates folders + config, pulls the image, and launches the container. |
+| Windows | `install-windows.ps1` | PowerShell script — checks for Docker Desktop, writes `config.json`, launches the container. |
+| macOS | `install-mac.sh` | Bash script — provisions Docker, launches the container. |
+| Linux | `install-linux.sh` | Bash script — installs Docker if missing, launches the container. |
+| macOS menu app | `BlokduckMenuApp-Mac-Arm.tar.gz` / `BlokduckMenuApp-Mac-x86.tar.gz` | Extract and drop `BlokduckMenu.app` into Applications. The menu-bar icon edits `config.json` and starts/stops the container. |
 
 All artifacts are attached to the
 [latest release](https://github.com/Quantafin-Lab/blokduck/releases/latest).

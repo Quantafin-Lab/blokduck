@@ -7,46 +7,56 @@ documents and images, then redacts or reversibly encodes it — entirely on your
 machine. No cloud, no data egress. Redaction is key-based: only a holder of the
 private key can recover the original values.
 
-## Supported platforms
-
-Prebuilt binaries are published for each release:
-
-| Platform | Architecture | Artifact |
-| --- | --- | --- |
-| macOS | Apple Silicon (arm64) | `rde_obfuscator-aarch64-apple-darwin-v<version>.tar.gz` |
-| Linux | x86_64 | `rde_obfuscator-x86_64-unknown-linux-gnu-v<version>.tar.gz` |
-
-Each archive contains two binaries:
-
-- **`rde_cli`** — the command-line tool for redaction and encoding (what most users want).
-- **`rde_obfuscator`** — the HTTP service, for integrating obfuscation into a stack.
-
-Windows binaries are not yet published.
+BlokDuck runs inside a Docker container with deliberately limited host access
+(read-only input, write-only output, localhost-only networking), so the redaction
+engine never touches anything beyond the folders you mount.
 
 ## Installation
 
-Download the archive for your platform from the
-[latest release](https://github.com/Quantafin-Lab/blokduck/releases/latest),
-verify it, and extract:
+### Docker (recommended — all platforms)
+
+The official image is multi-architecture (`linux/amd64` + `linux/arm64`) and runs
+identically on Windows, macOS, and Linux:
 
 ```bash
-# macOS (Apple Silicon)
-curl -fsSLO https://github.com/Quantafin-Lab/blokduck/releases/latest/download/rde_obfuscator-aarch64-apple-darwin-v<version>.tar.gz
+docker pull ghcr.io/quantafin-lab/blokduck:latest
 
-# Linux (x86_64)
-curl -fsSLO https://github.com/Quantafin-Lab/blokduck/releases/latest/download/rde_obfuscator-x86_64-unknown-linux-gnu-v<version>.tar.gz
-
-tar xzf rde_obfuscator-*.tar.gz
-sudo mv rde_obfuscator-*/rde_cli /usr/local/bin/
+docker run -d --name blokduck -p 8787:8787 \
+  -v "$HOME/Blokduck/input:/input:ro" \
+  -v "$HOME/Blokduck/output:/output" \
+  -v "$HOME/Blokduck/config.json:/etc/blokduck/config.json:ro" \
+  -e RDE_PROFILE=default \
+  ghcr.io/quantafin-lab/blokduck:latest
 ```
 
-### Verify your download
+Then open http://localhost:8787 in your browser. The web UI (redaction, profiles,
+and audit artifacts) is baked into the image; the server binds loopback only and
+makes no outbound calls.
 
-Every release includes a `checksums.sha256` file. After downloading, confirm the
-archive is intact:
+Pin a specific release instead of `latest` by using the version tag, e.g.
+`ghcr.io/quantafin-lab/blokduck:0.4.10`.
+
+### Platform installers
+
+Each release also ships a Docker-first installer that provisions Docker (if
+missing) and launches the container for you:
+
+| Platform | Artifact | Notes |
+| --- | --- | --- |
+| Windows | `blokduck-docker-setup-v<version>.exe` | Inno Setup wizard — checks for Docker Desktop, writes `config.json`, creates a Desktop shortcut, launches the container on port 8787. |
+| macOS | `BlokduckMenu-app.tar.gz` | Extract and drop `BlokduckMenu.app` into Applications. The menu-bar icon edits `config.json` and starts/stops the Docker container. |
+| Linux | `blokduck-linux-x86_64.tar.gz` | Extract and run `bash install.sh`. Installs Docker if missing, creates folders + config, pulls the image, and launches the container. |
+
+All artifacts are attached to the
+[latest release](https://github.com/Quantafin-Lab/blokduck/releases/latest).
+
+## Using the CLI
+
+The container bundles `rde_cli`. Run it inside the running container via
+`bin/docker_cli.sh` (see the release notes) or directly:
 
 ```bash
-shasum -a 256 -c checksums.sha256
+docker exec -it blokduck rde_cli --help
 ```
 
 ## Quick start
@@ -84,10 +94,10 @@ for full usage.
 
 ## Troubleshooting
 
-- **`command not found`** — ensure the install location (e.g. `/usr/local/bin`) is on
-  your `PATH`, or invoke the binary by its full path.
-- **Permission denied** — mark the binary executable: `chmod +x rde_cli`.
-- **macOS "cannot be opened"** — remove the quarantine attribute:
-  `xattr -d com.apple.quarantine rde_cli`.
+- **Docker not installed** — the Windows and Linux installers guide you through
+  installing Docker. Manually: [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+  (Windows/macOS) or [Docker Engine](https://docs.docker.com/engine/install/) (Linux).
+- **Port 8787 already in use** — run the container on another host port with
+  `-p 8080:8787`, or set `port` in `config.json`.
 - **`redact-image` errors** — install Tesseract OCR (`brew install tesseract` /
   `apt-get install tesseract-ocr`) and ensure `tesseract` is on `PATH`.
